@@ -13,7 +13,7 @@
   </form>
 
   <h2>User URLs:</h2>
-  <ul id="userUrls"></ul>
+  <ol id="userUrls"></ol>
 
   <h2>Delete All Images:</h2>
   <button id="deleteImagesButton">Delete All Images</button>
@@ -39,6 +39,22 @@
         .catch(error => {
           console.log('Error:', error);
         });
+    }
+	
+	function deleteAllImages() {
+      if (confirm('Are you sure you want to delete all images?')) {
+        fetch('/delete-images', { method: 'DELETE' })
+          .then(response => {
+            if (response.ok) {
+              fetchUserURLs();
+            } else {
+              console.log('Delete failed:', response.status);
+            }
+          })
+          .catch(error => {
+            console.log('Error:', error);
+          });
+      }
     }
 
     // Disable the upload button
