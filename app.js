@@ -46,8 +46,8 @@ app.get('/', (req, res) => {
 app.get('/user-urls', (req, res) => {
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
-      const imageContentHash = crypto.createHash('md5').update(file).digest('hex');
-      return `${baseUserURL}${file}?imagecontenthash=${imageContentHash}`;
+      const ihash = crypto.createHash('md5').update(file).digest('hex');
+      return `${baseUserURL}${file}?ihash=${ihash}`;
     });
 
   res.json({ userURLs });
@@ -94,7 +94,7 @@ app.post('/cdn/upload', upload.single('image'), (req, res) => {
 // Serve images based on the filename and content hash
 app.use('/cdn/images/:file', (req, res, next) => {
   const fileName = req.params.file;
-  const imageContentHash = req.query.imagecontenthash;
+  const ihash = req.query.ihash;
   const filePath = path.join(__dirname, 'images', fileName);
 
   // Check if the file exists
@@ -104,7 +104,7 @@ app.use('/cdn/images/:file', (req, res, next) => {
 
   // Verify if the image content hash matches the filename
   const hash = crypto.createHash('md5').update(fileName).digest('hex');
-  if (hash !== imageContentHash) {
+  if (hash !== ihash) {
     return res.status(403).send('Access denied. Invalid image hash.');
   }
 
