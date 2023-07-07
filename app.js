@@ -110,7 +110,7 @@ app.use('/cdn/images/:file', (req, res, next) => {
   }
 
   // Determine the content type based on the file extension
-  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp','.jfif'];
   const extension = path.extname(filePath).toLowerCase();
   if (!allowedExtensions.includes(extension)) {
     return res.status(404).send('File not found.');
