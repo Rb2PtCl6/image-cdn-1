@@ -39,7 +39,7 @@ app.use(basicAuth({
 
 // Serve the admin HTML page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin-2.html'));
+  res.sendFile(path.join(__dirname, 'admin-3.html'));
 });
 
 // Endpoint to fetch user URLs
