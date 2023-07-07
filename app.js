@@ -10,7 +10,7 @@ const fs = require('fs');
 const app = express();
 
 // Define the blocked IP addresses
-const blockedIPs = ['192.168.0.1', '10.0.0.1'];
+const blockedIPs = ['192.168.0.1','192.168.0.2'];
 
 // Define the username and password for authentication
 const auth = {
