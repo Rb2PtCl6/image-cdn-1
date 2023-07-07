@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control panel</title>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        div.main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        div.main {
+            font-family: Arial, Helvetica, sans-serif;
+            color: black;
+        }
+
+        div.header2 {
+            display: flex;
+            align-items: center;
+            font-size: calc(100vh / 10 * 0.6);
+            border-bottom: 1px solid rgba(46, 102, 83, 0.9);
+        }
+
+        div.header1 {
+            display: flex;
+            font-size: calc(100vh / 10 * 0.7);
+        }
+
+        .input1 {
+            font-size: calc(100vh / 10 * 0.5);
+            border: 1px solid rgba(46, 102, 83, 0.9);
+            background-color: rgba(79, 231, 180, 0.9);
+            color: rgb(22, 22, 126);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .input1:disabled {
+            background-color: red;
+        }
+
+        div.footer {
+            display: flex;
+            align-items: center;
+            font-size: calc(100vh / 10 * 0.35);
+        }
+
+        div.url {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        div.full {
+            width: 100%;
+        }
+
+        div.h10 {
+            height: 10%;
+        }
+
+        div.h80 {
+            height: 80%;
+        }
+
+        div.w50 {
+            width: 50%;
+        }
+
+        div.center {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        div.flex1 {
+            display: flex;
+            align-items: center;
+        }
+
+        div.flex1:nth-child(2) {
+            justify-content: flex-end;
+        }
+
+        div.fullh {
+            height: 100%;
+        }
+
+        div.list {
+            width: 20%;
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        div.preview {
+            width: 80%;
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        div.fullw {
+            width: 100%;
+        }
+
+        div.header2 {
+            height: 10%;
+        }
+
+        div.content {
+            height: 90%;
+        }
+
+        div.img {
+            height: 90%;
+        }
+
+        div.url {
+            height: 10%;
+        }
+
+        /* color prod */
+        .light1 {
+            background-color: rgba(127, 255, 212, 0.7);
+        }
+
+        .light2 {
+            background-color: rgba(127, 255, 212, 0.5);
+        }
+
+        .light3 {
+            background-color: rgba(127, 255, 212, 0.3);
+        }
+
+        #imgbox {
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .in-content {
+            cursor: pointer;
+            border-bottom: 1px solid rgba(46, 102, 83, 0.9);
+        }
+
+        .content {
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="header1 full h10 light1">
+            <div class="fullh w50 flex1">
+                <div class="text1">Control panel</div>
+            </div>
+            <div class="fullh w50 flex1">
+                <div class="button1">
+                    <div onclick="deleteAllImages()" class="input1">Delete all</div>
+                </div>
+            </div>
+        </div>
+        <div class="center full h80">
+            <div class="list fullh light2">
+                <div class="header2 fullw">List of content</div>
+                <div class="content fullw" id="content"></div>
+            </div>
+            <div class="preview fullh light3">
+                <div class="img fullw" id="imgbox"></div>
+                <div class="url fullw" id="url"></div>
+            </div>
+        </div>
+        <div class="footer full h10 light1">
+            <form id="uploadForm" action="/cdn/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" required class="input1">
+                <button id="uploadButton" type="submit" class="input1">Upload</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function fetchUserURLs() {
+            fetch('/user-urls')
+                .then(response => response.json())
+                .then(data => {
+                    var num = 0
+                    data.userURLs.forEach(url => {
+                        num++
+                        var name_like_arr = url.split("/")
+                        var name = ((name_like_arr[name_like_arr.length - 1]).split("?"))[0]
+                        var span = document.createElement("div")
+                        span.classList.add("in-content")
+                        span.innerHTML = `${num}. ${name}`
+                        span.id = name
+                        document.getElementById("content").appendChild(span)
+                        document.getElementById(name).addEventListener("click", function () {
+                            // console.log(name)
+                            document.getElementById("url").innerHTML = ""
+                            var a = document.createElement("a")
+                            a.href = url
+                            a.innerHTML = url
+                            a.target = "_blank"
+                            document.getElementById("url").appendChild(a)
+                            // console.log(url)
+                            document.getElementById("imgbox").style.backgroundImage = `url(${url})`
+                        })
+                    });
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                });
+        }
+
+        function deleteAllImages() {
+            if (confirm('Are you sure you want to delete all images?')) {
+                fetch('/delete-images', { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            document.getElementById("content").innerHTML = ""
+                            fetchUserURLs();
+                            location.reload()
+                        } else {
+                            console.log('Delete failed:', response.status);
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Error:', error);
+                    });
+            }
+        }
+
+        function disableUploadButton() {
+            const uploadButton = document.getElementById('uploadButton');
+            uploadButton.disabled = true;
+        }
+
+        function enableUploadButton() {
+            const uploadButton = document.getElementById('uploadButton');
+            uploadButton.disabled = false;
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', event => {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            disableUploadButton();
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        form.reset();
+                        document.getElementById("content").innerHTML = ""
+                        fetchUserURLs();
+                    } else {
+                        console.log('Upload failed:', response.status);
+                    }
+                    enableUploadButton();
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                    enableUploadButton();
+                });
+        });
+
+        window.addEventListener('load', fetchUserURLs);
+    </script>
+</body>
+
+</html>

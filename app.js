@@ -21,6 +21,7 @@ const auth = {
 
 // Define the base URL for user-facing images
 const baseUserURL = 'https://img-cdn-tfsb.onrender.com/cdn/images/';
+// const baseUserURL = 'http://127.0.0.1:3000/cdn/images/';
 
 // Middleware to check IP address restriction
 app.use((req, res, next) => {
@@ -39,7 +40,7 @@ app.use(basicAuth({
 
 // Serve the admin HTML page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin-3.html'));
+  res.sendFile(path.join(__dirname, 'admin-4.html'));
 });
 
 // Endpoint to fetch user URLs
