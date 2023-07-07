@@ -20,7 +20,7 @@ const auth = {
 };
 
 // Define the base URL for user-facing images
-const baseUserURL = 'http://localhost:3000/cdn/images/';
+const baseUserURL = 'https://img-cdn-tfsb.onrender.com/cdn/images/';
 
 // Middleware to check IP address restriction
 app.use((req, res, next) => {
