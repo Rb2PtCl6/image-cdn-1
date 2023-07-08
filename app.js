@@ -10,7 +10,7 @@ const fs = require('fs');
 const app = express();
 
 // Define the blocked IP addresses
-const blockedIPs = ['192.168.0.1','192.168.0.2'];
+const blockedIPs = ['192.168.0.1', '192.168.0.2'];
 
 // Define the username and password for authentication
 const auth = {
@@ -20,7 +20,7 @@ const auth = {
 };
 
 // Define the base URL for user-facing images
-const baseUserURL = 'https://img-cdn-tfsb.onrender.com/cdn/images/';
+//const baseUserURL = 'https://img-cdn-tfsb.onrender.com/cdn/images/';
 // const baseUserURL = 'http://127.0.0.1:3000/cdn/images/';
 
 // Middleware to check IP address restriction
@@ -45,10 +45,12 @@ app.get('/', (req, res) => {
 
 // Endpoint to fetch user URLs
 app.get('/user-urls', (req, res) => {
+  var baseUserURL1 = `${req.protocol}://${req.hostname}/cdn/images/`
+  console.log(req.hostname, req.protocol)
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
       const ihash = crypto.createHash('md5').update(file).digest('hex');
-      return `${baseUserURL}${file}?ihash=${ihash}`;
+      return `${baseUserURL1}${file}?ihash=${ihash}`;
     });
 
   res.json({ userURLs });
@@ -110,7 +112,7 @@ app.use('/cdn/images/:file', (req, res, next) => {
   }
 
   // Determine the content type based on the file extension
-  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp','.jfif'];
+  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.jfif'];
   const extension = path.extname(filePath).toLowerCase();
   if (!allowedExtensions.includes(extension)) {
     return res.status(404).send('File not found.');
