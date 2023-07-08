@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 // Endpoint to fetch user URLs
 app.get('/user-urls', (req, res) => {
   var baseUserURL1 = `${req.protocol}://${req.hostname}/cdn/images/`
-  console.log(req.hostname, req.protocol)
+  // console.log(req.hostname, req.protocol)
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
       const ihash = crypto.createHash('md5').update(file).digest('hex');
