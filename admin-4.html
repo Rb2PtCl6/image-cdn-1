@@ -268,7 +268,9 @@
                         document.getElementById("content").innerHTML = ""
                         fetchUserURLs();
                     } else {
-                        console.log('Upload failed:', response.status);
+                        console.log(`Upload failed: ${response.status}, denied to upload, allowed extensions: png, jpg, jpeg, webp, jfif, gif, avif`);
+                        alert(`Upload failed: ${response.status}, denied to upload, allowed extensions: png, jpg, jpeg, webp, jfif, gif, avif`)
+                        form.reset();
                     }
                     enableUploadButton();
                 })

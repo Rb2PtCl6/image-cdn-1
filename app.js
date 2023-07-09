@@ -12,6 +12,7 @@ const port = 3000;
 
 // Define the blocked IP addresses
 const blockedIPs = ['192.168.0.1', '192.168.0.2'];
+const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.jfif', '.gif', '.avif'];
 
 // Define the username and password for authentication
 const auth = {
@@ -49,32 +50,29 @@ app.get('/user-urls', (req, res) => {
   var baseUserURL1 //= `${req.protocol}://${req.hostname}/cdn/images/`
   console.log(req.hostname, req.protocol, req.secure)
   var host = req.hostname
-  var portt
-  if (host == "localhost" || host == "127.0.0.1"){
-    portt = `:${port}`
+  var port_num
+  if (host == "localhost" || host == "127.0.0.1") {
+    port_num = `:${port}`
   } else {
-    portt = ''
+    port_num = ''
   }
-  baseUserURL1 = `//${host}${portt}/cdn/images/`
+  baseUserURL1 = `//${host}${port_num}/cdn/images/`
   console.log(baseUserURL1)
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
-      const ihash = crypto.createHash('md5').update(file).digest('hex');
-      return `${baseUserURL1}${file}?ihash=${ihash}`;
+      const hash = crypto.createHash('md5').update(file).digest('hex');
+      return `${baseUserURL1}${file}?hash=${hash}`;
     });
-
   res.json({ userURLs });
 });
 
 // Endpoint to delete all images
 app.delete('/delete-images', (req, res) => {
   const directory = path.join(__dirname, 'images');
-
   fs.readdir(directory, (err, files) => {
     if (err) {
       return res.status(500).send('Failed to delete images.');
     }
-
     for (const file of files) {
       fs.unlink(path.join(directory, file), err => {
         if (err) {
@@ -82,7 +80,6 @@ app.delete('/delete-images', (req, res) => {
         }
       });
     }
-
     res.sendStatus(200);
   });
 });
@@ -92,9 +89,13 @@ const storage = multer.diskStorage({
   destination: path.join(__dirname, 'images'),
   filename: (req, file, cb) => {
     const uniqueName = uuidv4();
-    const extension = path.extname(file.originalname);
-    const fileName = `${uniqueName}${extension}`;
-    cb(null, fileName);
+    const extension = path.extname(file.originalname).toLowerCase();
+    if (allowedExtensions.includes(extension)) {
+      const fileName = `${uniqueName}${extension}`;
+      cb(null, fileName);
+    } else {
+      cb(`${extension.replace(".", "")} is not allowed to upload!`, false)
+    }
   },
 });
 const upload = multer({ storage });
@@ -107,7 +108,7 @@ app.post('/cdn/upload', upload.single('image'), (req, res) => {
 // Serve images based on the filename and content hash
 app.use('/cdn/images/:file', (req, res, next) => {
   const fileName = req.params.file;
-  const ihash = req.query.ihash;
+  const imghash = req.query.hash;
   const filePath = path.join(__dirname, 'images', fileName);
 
   // Check if the file exists
@@ -117,12 +118,11 @@ app.use('/cdn/images/:file', (req, res, next) => {
 
   // Verify if the image content hash matches the filename
   const hash = crypto.createHash('md5').update(fileName).digest('hex');
-  if (hash !== ihash) {
+  if (hash !== imghash) {
     return res.status(403).send('Access denied. Invalid image hash.');
   }
 
   // Determine the content type based on the file extension
-  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.jfif'];
   const extension = path.extname(filePath).toLowerCase();
   if (!allowedExtensions.includes(extension)) {
     return res.status(404).send('File not found.');
