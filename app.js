@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 
 const app = express();
+const port = 3000;
 
 // Define the blocked IP addresses
 const blockedIPs = ['192.168.0.1', '192.168.0.2'];
@@ -45,8 +46,23 @@ app.get('/', (req, res) => {
 
 // Endpoint to fetch user URLs
 app.get('/user-urls', (req, res) => {
-  var baseUserURL1 = `${req.protocol}://${req.hostname}/cdn/images/`
-  // console.log(req.hostname, req.protocol)
+  var baseUserURL1 //= `${req.protocol}://${req.hostname}/cdn/images/`
+  console.log(req.hostname, req.protocol, req.secure)
+  var host = req.hostname
+  var portt
+  if (host == "localhost" || host == "127.0.0.1"){
+    portt = `:${port}`
+  } else {
+    portt = ''
+  }
+  if (req.protocol == "http") {
+    if (req.secure) {
+      baseUserURL1 = `https://${req.hostname}${portt}/cdn/images/`
+    } else if (!req.secure) {
+      baseUserURL1 = `http://${req.hostname}${portt}/cdn/images/`
+    }
+  }
+  console.log(baseUserURL1)
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
       const ihash = crypto.createHash('md5').update(file).digest('hex');
@@ -118,10 +134,10 @@ app.use('/cdn/images/:file', (req, res, next) => {
     return res.status(404).send('File not found.');
   }
 
-  res.sendFile(filePath)//, { root: __dirname });
+  res.sendFile(filePath);
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log('Server started on port 3000');
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
 });
