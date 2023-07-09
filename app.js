@@ -55,13 +55,7 @@ app.get('/user-urls', (req, res) => {
   } else {
     portt = ''
   }
-  if (req.protocol == "http") {
-    if (req.secure) {
-      baseUserURL1 = `https://${req.hostname}${portt}/cdn/images/`
-    } else if (!req.secure) {
-      baseUserURL1 = `http://${req.hostname}${portt}/cdn/images/`
-    }
-  }
+  baseUserURL1 = `//${host}${portt}/cdn/images/`
   console.log(baseUserURL1)
   const userURLs = fs.readdirSync(path.join(__dirname, 'images'))
     .map(file => {
